@@ -1,0 +1,31 @@
+.container
+  %form{action: '/offers', method: 'post', id: 'category-form'}
+    %input{type: 'text', name: 'category', id: 'home-form-category', placeholder: 'Category Here. Ex: marketing, banca.'}
+    %select{ :name => "country[country_status]" }
+      %option{:value => 1}= "Guatemala"
+      %option{:value => 2}= "El Salvador"
+      %option{:value => 3}= "Honduras"  
+      %option{:value => 4}= "Nicaragua"  
+      %option{:value => 5}= "Costa Rica" 
+      %option{:value => 6}= "Panama" 
+      %option{:value => 7}= "Republica Dominicana" 
+    %input{type: 'submit', id: 'home-form-submit', class: 'submit', value: 'submit'}
+  %br
+  %br
+  %br
+
+  -if @category
+    %table{class: 'center'}
+      %tbody
+        %tr
+          %th Job
+          %th Date
+          %th Details
+        -@jobofferobject['offers'].each do |offer|
+          %tr
+            %td{width: '200'}
+              = offer['title']
+            %td{width: '100'}
+              = offer['date']
+            %td{width: '400'}
+              = offer['details']

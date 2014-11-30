@@ -159,7 +159,7 @@ class TecolocoJobOffers < Sinatra::Base
     category = params[:category].split("\r\n")
     city = params[:city].split("\r\n")
     param = {
-      category: category
+      category: category,
       city: city
     }
 
