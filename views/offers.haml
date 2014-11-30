@@ -2,13 +2,13 @@
   %form{action: '/offers', method: 'post', id: 'category-form'}
     %input{type: 'text', name: 'category', id: 'home-form-category', placeholder: 'Category Here. Ex: marketing, banca.'}
     %select{ :name => "city" }
-      %option{:value => 1}= "Guatemala"
-      %option{:value => 2}= "El Salvador"
-      %option{:value => 3}= "Honduras"  
-      %option{:value => 4}= "Nicaragua"  
-      %option{:value => 5}= "Costa Rica" 
-      %option{:value => 6}= "Panama" 
-      %option{:value => 7}= "Republica Dominicana" 
+      %option{:value => "Guatemala"}= "Guatemala"
+      %option{:value => "El Salvador"}= "El Salvador"
+      %option{:value => "Honduras"}= "Honduras"  
+      %option{:value => "Nicaragua"}= "Nicaragua"  
+      %option{:value => "Costa Rica"}= "Costa Rica" 
+      %option{:value => "Panama"}= "Panama" 
+      %option{:value => "Republica Dominicana"}= "Republica Dominicana" 
     %input{type: 'submit', id: 'home-form-submit', class: 'submit', value: 'submit'}
   %br
   %br

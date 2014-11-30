@@ -3,6 +3,7 @@ require 'sinatra/base'
 require 'jobhunters'
 require 'json'
 require_relative 'model/offer'
+require 'httparty'
 require 'haml'
 require 'sinatra/flash'
 
