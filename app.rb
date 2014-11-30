@@ -212,9 +212,9 @@ class TecolocoJobOffers < Sinatra::Base
     content_type:json
     logger.info "GET /api/v1/offers/#{params[:id]}"
     begin
-      @Category = Category.find(params[:id])
+      @category = Category.find(params[:id])
       cat = JSON.parse(@category.category)
-      city = JSON.parse(@city.city)
+      city = JSON.parse(@category.city)
       logger.info({ category: cat, city: city }.to_json)
     rescue
       halt 400
