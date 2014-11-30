@@ -15,9 +15,9 @@ class TecolocoJobOffers < Sinatra::Base
   configure :production, :development do
     enable :logging
   end
-  
+
   API_BASE_URI = 'http://localhost:9292'
-  
+  after { ActiveRecord::Base.connection.close }
   helpers do
     def offerobject
       category = check_cat(params[:category])
@@ -138,18 +138,22 @@ class TecolocoJobOffers < Sinatra::Base
 
   post '/api/v1/joboffers' do
     content_type:json
-    begin
-      req = JSON.parse(request.body.read)
-      logger.info req
-    rescue
-      halt 400
-    end
+
+      body = request.body.read
+      logger.info body
+      begin
+        req = JSON.parse(body)
+        logger.info req
+      rescue Exception => e
+        puts e.message
+        halt 400
+      end
 
     cat = Category.new
     cat.category = req['category'].to_json
     cat.city = req['city'].to_json
+
     if cat.save
-      status 201
       redirect "/api/v1/offers/#{cat.id}"
     end
   end
@@ -174,7 +178,7 @@ class TecolocoJobOffers < Sinatra::Base
     result = HTTParty.post(request_url, request)
 
     if (result.code != 200)
-      flash[:notice] = 'Category not found'
+      flash[:notice] = 'The values provided did not match any result'
       redirect '/offers'
       return nil
     end
@@ -201,19 +205,23 @@ class TecolocoJobOffers < Sinatra::Base
 
     @id = params[:id]
     @action = :update
-    haml :joboffers
+    haml :offers
   end
 
   get '/api/v1/offers/:id' do
     content_type:json
-    begin
-      @category = Category.find(params[:id])
+    logger.info "GET /api/v1/offers/#{params[:id]}"
+    #begin
+      @Category = Category.find(params[:id])
       cat = JSON.parse(@category.category)
       city = JSON.parse(@city.city)
-    rescue
-      halt 400
-    end
-    get_jobs_cat_city(cat,city).to_json
+      logger.info({ category: cat, city: city }.to_json)
+    #rescue
+      #halt 400
+    #end
+    result = get_jobs_cat_city(cat,city).to_json
+    logger.info "result: #{result}\n"
+    result
   end
 
   get '/joboffers' do
@@ -245,7 +253,7 @@ class TecolocoJobOffers < Sinatra::Base
   get '/offers' do
     haml :offers
   end
-  
+
   delete 'offers/:id' do
 
       request_url = "#{API_BASE_URI}/api/v1/joboffers/#{params[:id]}"
