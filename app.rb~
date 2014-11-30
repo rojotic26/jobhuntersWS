@@ -171,7 +171,7 @@ class TecolocoJobOffers < Sinatra::Base
       body: param.to_json,
       headers: { 'Content-Type' => 'application/json' }
     }
-    result = HTTParty.post(request_url, options)
+    result = HTTParty.post(request_url, request)
 
     if (result.code != 200)
       flash[:notice] = 'Category not found'
