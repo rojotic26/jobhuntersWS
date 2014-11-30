@@ -10,6 +10,7 @@ class TecolocoJobOffers < Sinatra::Base
   #register Sinatra::Namespace
   enable :sessions
   register Sinatra::Flash
+  use Rack::MethodOverride
   configure :production, :development do
     enable :logging
   end
@@ -228,6 +229,12 @@ class TecolocoJobOffers < Sinatra::Base
     haml :aboutus
   end
 
+  delete 'offers/:id' do
+    
+      request_url = "#{API_BASE_URI}/api/v1/joboffers/#{params[:id]}"
+      result = HTTParty.delete(request_url)
+      redirect '/offers'
+  end
 
 
 end
