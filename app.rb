@@ -142,7 +142,8 @@ class TecolocoJobOffers < Sinatra::Base
     end
 
     cat = Category.new
-    cat.description = req['description'].to_json
+    cat.category = req['category'].to_json
+    cat.city = req['city'].to_json
     if cat.save
       status 201
       redirect "/api/v1/offers/#{cat.id}"
@@ -156,8 +157,10 @@ class TecolocoJobOffers < Sinatra::Base
   post '/offers' do
     request_url = "#{API_BASE_URI}/api/v1/joboffers"
     category = params[:category].split("\r\n")
+    city = params[:city].split("\r\n")
     param = {
       category: category
+      city: city
     }
 
     request = {
@@ -175,6 +178,7 @@ class TecolocoJobOffers < Sinatra::Base
     id = result.request.last_uri.path.split('/').last
     session[:result] = result.to_json
     session[:category] = category
+    session[:city] = city
     session[:action] = :create
     redirect "/offers/#{id}"
   end
@@ -182,7 +186,8 @@ class TecolocoJobOffers < Sinatra::Base
   get 'offers/:id' do
     if sessiion[:action] == :create
       @results = JSON.parse(session[:result])
-      @category = session [:category]
+      @category = session[:category]
+      @city = session[:city]
     else
       request_url = "#{API_BASE_URI}/api/v1/joboffers/#{params[:id]}"
       request = { headers: {'Content-Type' => 'application/json' } }
@@ -199,12 +204,12 @@ class TecolocoJobOffers < Sinatra::Base
     content_type:json
     begin
       @category = Category.find(params[:id])
-      cat = JSON.parse(@category.description)
-
+      cat = JSON.parse(@category.category)
+      city = JSON.parse(@city.city)
     rescue
       halt 400
     end
-    list_joboffers(cat).to_json
+    get_jobs_cat_city(cat,city).to_json
   end
 
   get '/joboffers' do
