@@ -1,4 +1,4 @@
-class CreateJoboffers < ActiveRecord::Migration
+class CreateOffers < ActiveRecord::Migration
   def self.up
     create_table :offers do |t|
       t.string :title
@@ -12,10 +12,16 @@ class CreateJoboffers < ActiveRecord::Migration
       t.string :category
       t.timestamps
     end
+    create_table :citcat do |t|
+      t.string :city
+      t.string :category
+      t.timestamps
+    end
   end
 
   def self.down
-  drop_table :offers
-  drop_table :categories
+    drop_table :offers
+    drop_table :categories
+    drop_table :citcat
   end
 end
