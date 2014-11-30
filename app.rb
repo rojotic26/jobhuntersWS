@@ -205,7 +205,7 @@ class TecolocoJobOffers < Sinatra::Base
 
     @id = params[:id]
     @action = :update
-    haml :joboffers
+    haml :offers
   end
 
   get '/api/v1/offers/:id' do
