@@ -233,6 +233,10 @@ class TecolocoJobOffers < Sinatra::Base
     haml :aboutus
   end
 
+  get '/offers' do
+    haml :offers
+  end
+  
   delete 'offers/:id' do
 
       request_url = "#{API_BASE_URI}/api/v1/joboffers/#{params[:id]}"
