@@ -174,7 +174,7 @@ class TecolocoJobOffers < Sinatra::Base
     result = HTTParty.post(request_url, request)
 
     if (result.code != 200)
-      flash[:notice] = 'Category not found'
+      flash[:notice] = 'The values provided did not match any result'
       redirect '/offers'
       return nil
     end

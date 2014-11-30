@@ -15,10 +15,10 @@
           %a{:href => '/joboffers', :id => 'joboffers'} Job Offers
       - if current_page?('offers')
         %li{:class => 'current_page_item'}
-          %a{:href => '/offers', :id => 'offers'} Offers per City
+          %a{:href => '/offers', :id => 'offers'} Job Offers 2
       - else
         %li
-          %a{:href => '/offers', :id => 'offers'} Offers per City
+          %a{:href => '/offers', :id => 'offers'} Job Offers 2
       - if current_page?('aboutus')
         %li{:class => 'current_page_item'}
           %a{:href => '/aboutus', :id => 'aboutus'} About Us
