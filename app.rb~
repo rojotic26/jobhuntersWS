@@ -148,6 +148,10 @@ class TecolocoJobOffers < Sinatra::Base
       redirect "/api/v1/offers/#{cat.id}"
     end
   end
+  
+  delete '/api/v1/joboffers/:id'
+    cat = Category.destroy(params[:id])
+  end
 
   post '/offers' do
     request_url = "#{API_BASE_URI}/api/v1/joboffers"
@@ -233,8 +237,10 @@ class TecolocoJobOffers < Sinatra::Base
     
       request_url = "#{API_BASE_URI}/api/v1/joboffers/#{params[:id]}"
       result = HTTParty.delete(request_url)
+      flash[:notice] = 'record of tutorial deleted'
       redirect '/offers'
+  
   end
 
-
+ 
 end
