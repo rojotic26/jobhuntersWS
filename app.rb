@@ -17,7 +17,7 @@ class TecolocoJobOffers < Sinatra::Base
     def offerobject
       category = check_cat(params[:category])
        if category == 'none' then
-         
+
          return nil
 
        end
@@ -146,6 +146,48 @@ class TecolocoJobOffers < Sinatra::Base
       status 201
       redirect "/api/v1/offers/#{cat.id}"
     end
+  end
+
+  post '/offers' do
+    request_url = "#{API_BASE_URI}/api/v1/joboffers"
+    category = params[:category].split("\r\n")
+    param = {
+      category: category
+    }
+
+    request = {
+      body: param.to_json,
+      headers: { 'Content-Type' => 'application/json' }
+    }
+    result = HTTParty.post(request_url, options)
+
+    if (result.code != 200)
+      flash[:notice] = 'Category not found'
+      redirect '/offers'
+      return nil
+    end
+
+    id = result.request.last_uri.path.split('/').last
+    session[:result] = result.to_json
+    session[:category] = category
+    session[:action] = :create
+    redirect "/offers/#{id}"
+  end
+
+  get 'offers/:id' do
+    if sessiion[:action] == :create
+      @results = JSON.parse(session[:result])
+      @category = session [:category]
+    else
+      request_url = "#{API_BASE_URI}/api/v1/joboffers/#{params[:id]}"
+      request = { headers: {'Content-Type' => 'application/json' } }
+      result = HTTParty.get(request_url,options)
+      @results = results
+    end
+
+    @id = params[:id]
+    @action = :update
+    haml :joboffers
   end
 
   get '/api/v1/offers/:id' do
