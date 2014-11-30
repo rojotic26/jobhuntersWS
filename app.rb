@@ -15,9 +15,9 @@ class TecolocoJobOffers < Sinatra::Base
   configure :production, :development do
     enable :logging
   end
-  
+
   API_BASE_URI = 'http://localhost:9292'
-  
+  after { ActiveRecord::Base.connection.close }
   helpers do
     def offerobject
       category = check_cat(params[:category])
@@ -245,7 +245,7 @@ class TecolocoJobOffers < Sinatra::Base
   get '/offers' do
     haml :offers
   end
-  
+
   delete 'offers/:id' do
 
       request_url = "#{API_BASE_URI}/api/v1/joboffers/#{params[:id]}"
