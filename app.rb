@@ -138,18 +138,22 @@ class TecolocoJobOffers < Sinatra::Base
 
   post '/api/v1/joboffers' do
     content_type:json
-    begin
-      req = JSON.parse(request.body.read)
-      logger.info req
-    rescue
-      halt 400
-    end
+
+      body = request.body.read
+      logger.info body
+      begin
+        req = JSON.parse(body)
+        logger.info req
+      rescue Exception => e
+        puts e.message
+        halt 400
+      end
 
     cat = Category.new
     cat.category = req['category'].to_json
     cat.city = req['city'].to_json
+
     if cat.save
-      status 201
       redirect "/api/v1/offers/#{cat.id}"
     end
   end
@@ -206,14 +210,18 @@ class TecolocoJobOffers < Sinatra::Base
 
   get '/api/v1/offers/:id' do
     content_type:json
+    logger.info "GET /api/v1/offers/#{params[:id]}"
     begin
-      @category = Category.find(params[:id])
+      @Category = Category.find(params[:id])
       cat = JSON.parse(@category.category)
       city = JSON.parse(@city.city)
+      logger.info({ category: cat, city: city }.to_json)
     rescue
       halt 400
     end
-    get_jobs_cat_city(cat,city).to_json
+    result = get_jobs_cat_city(cat,city).to_json
+    logger.info "result: #{result}\n"
+    result
   end
 
   get '/joboffers' do
