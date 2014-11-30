@@ -14,6 +14,9 @@ class TecolocoJobOffers < Sinatra::Base
   configure :production, :development do
     enable :logging
   end
+  
+  API_BASE_URI = 'http://localhost:9292'
+  
   helpers do
     def offerobject
       category = check_cat(params[:category])
