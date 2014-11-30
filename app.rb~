@@ -234,8 +234,6 @@ class TecolocoJobOffers < Sinatra::Base
       request_url = "#{API_BASE_URI}/api/v1/joboffers/#{params[:id]}"
       result = HTTParty.delete(request_url)
       redirect '/offers'
-   
-
   end
 
 
