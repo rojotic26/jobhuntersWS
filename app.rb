@@ -64,22 +64,50 @@ class TecolocoJobOffers < Sinatra::Base
         'jobs' => []
       }
       flag=false
-      category = params[:category]
-      city = params[:city]
-      JobSearch::Tecoloco.getjobs(category).each do |title, date, cities|
-        if cities.to_s == city.to_s
-          flag=true
-          jobs_after_city['jobs'].push('id' => title, 'date' => date)
+      cat = category[0]
+      cit = city[0]
+        JobSearch::Tecoloco.getjobs(cat).each do |title, date, cities|
+          if cities.to_s == cit.to_s
+            flag=true
+            jobs_after_city['jobs'].push('id' => title, 'date' => date)
+          end
         end
-      end
-      if flag==false then
-        halt 404
-      else
-        jobs_after_city
-      end
+        if flag==false then
+          halt 404
+        else
+          jobs_after_city
+        end
+
 
     end
 
+    def get_jobs_cat_city_url(category,city)
+      jobs_after_city = {
+        'type of job' => category,
+        'kind' => 'openings',
+        'city' => city,
+        'jobs' => []
+      }
+      flag=false
+      category = params[:category]
+      city = params[:city]
+
+
+        JobSearch::Tecoloco.getjobs(cat).each do |title, date, cities|
+          if cities.to_s == city.to_s
+            flag=true
+            jobs_after_city['jobs'].push('id' => title, 'date' => date)
+          end
+        end
+        if flag==false then
+          halt 404
+        else
+          jobs_after_city
+        end
+
+
+
+    end
 
     #Defining the function get_jobs_city
     def check_cat(category)
@@ -111,6 +139,7 @@ class TecolocoJobOffers < Sinatra::Base
       request_path[1] == path
     end
 
+
   end
 
 
@@ -132,35 +161,9 @@ class TecolocoJobOffers < Sinatra::Base
 
   get '/api/v1/job_openings/:category/city/:city.json' do
     content_type :json
-    get_jobs_cat_city(params[:category],params[:city]).to_json
+    get_jobs_cat_city_url(params[:category],params[:city]).to_json
   end
 
-
-  post '/api/v1/joboffers' do
-    content_type:json
-
-      body = request.body.read
-      logger.info body
-      begin
-        req = JSON.parse(body)
-        logger.info req
-      rescue Exception => e
-        puts e.message
-        halt 400
-      end
-
-    cat = Category.new
-    cat.category = req['category'].to_json
-    cat.city = req['city'].to_json
-
-    if cat.save
-      redirect "/api/v1/offers/#{cat.id}"
-    end
-  end
-
-  delete '/api/v1/joboffers/:id' do
-    cat = Category.destroy(params[:id])
-  end
 
   post '/offers' do
     request_url = "#{API_BASE_URI}/api/v1/joboffers"
@@ -191,8 +194,51 @@ class TecolocoJobOffers < Sinatra::Base
     redirect "/offers/#{id}"
   end
 
-  get 'offers/:id' do
-    if sessiion[:action] == :create
+  post '/api/v1/joboffers' do
+    content_type:json
+
+    body = request.body.read
+    logger.info body
+    begin
+      req = JSON.parse(body)
+      logger.info req
+    rescue Exception => e
+      puts e.message
+      halt 400
+    end
+
+    cat = Category.new
+    cat.category = req['category'].to_json
+    cat.city = req['city'].to_json
+
+    if cat.save
+      redirect "/api/v1/offers/#{cat.id}"
+    end
+  end
+
+  delete '/api/v1/joboffers/:id' do
+    cat = Category.destroy(params[:id])
+  end
+
+  get '/api/v1/offers/:id' do
+    content_type:json
+    logger.info "GET /api/v1/offers/#{params[:id]}"
+    begin
+      @category = Category.find(params[:id])
+      cat = JSON.parse(@category.category)
+      cat2 = @category.category
+      city = JSON.parse(@category.city)
+    rescue
+      halt 400
+    end
+    logger.info({ category: cat, city: city }.to_json)
+    result = get_jobs_cat_city(cat, city).to_json
+    logger.info "result: #{result}\n"
+    result
+  end
+
+  get '/offers/:id' do
+    if session[:action] == :create
       @results = JSON.parse(session[:result])
       @category = session[:category]
       @city = session[:city]
@@ -208,21 +254,7 @@ class TecolocoJobOffers < Sinatra::Base
     haml :offers
   end
 
-  get '/api/v1/offers/:id' do
-    content_type:json
-    logger.info "GET /api/v1/offers/#{params[:id]}"
-    begin
-      @category = Category.find(params[:id])
-      cat = JSON.parse(@category.category)
-      city = JSON.parse(@category.city)
-      logger.info({ category: cat, city: city }.to_json)
-    rescue
-      halt 400
-    end
-    result = get_jobs_cat_city(cat,city).to_json
-    logger.info "result: #{result}\n"
-    result
-  end
+
 
   get '/joboffers' do
 
