@@ -1,31 +1,47 @@
 .container
   %form{action: '/offers', method: 'post', id: 'category-form'}
-    %input{type: 'text', name: 'category', id: 'home-form-category', placeholder: 'Category Here. Ex: marketing, banca.'}
-    %select{ :name => "city" }
-      %option{:value => "Guatemala"}= "Guatemala"
-      %option{:value => "El Salvador"}= "El Salvador"
-      %option{:value => "Honduras"}= "Honduras"  
-      %option{:value => "Nicaragua"}= "Nicaragua"  
-      %option{:value => "Costa Rica"}= "Costa Rica" 
-      %option{:value => "Panama"}= "Panama" 
-      %option{:value => "Republica Dominicana"}= "Republica Dominicana" 
-    %input{type: 'submit', id: 'home-form-submit', class: 'submit', value: 'submit'}
+    %dl{class: 'user-input'}
+      %dt
+        %label{:for => 'input-categories'} Input a Category
+      %dd
+        - if @category
+          = find_and_preserve "<input type=\"text\" name=\"category\" id=\"home-form-category\"}>#{@category[0]}</input>"
+        - else
+          %input{type: 'text', name: 'category', id: 'home-form-category'}
+    %dl{class: 'user-input'}
+      %dt
+        %label{:for => 'input-city'} Select a City
+      %dd
+        %select{ :name => "city" }
+          %option{:value => "Guatemala"}= "Guatemala"
+          %option{:value => "El Salvador"}= "El Salvador"
+          %option{:value => "Honduras"}= "Honduras"
+          %option{:value => "Nicaragua"}= "Nicaragua"
+          %option{:value => "Costa Rica"}= "Costa Rica"
+          %option{:value => "Panama"}= "Panama"
+          %option{:value => "Republica Dominicana"}= "Republica Dominicana"
+    .float-clear
+      %input{type: 'submit', id: 'home-form-submit', class: 'submit', value: 'submit'}
   %br
   %br
   %br
 
-  -if @result
+  -if @results
+    %h1 Results
     %table{class: 'center'}
       %tbody
         %tr
           %th Job
           %th Date
+          %th Country
           %th Details
-        -@jobofferobject['offers'].each do |offer|
+        -@results['jobs'].each do |jobs|
           %tr
             %td{width: '200'}
-              = offer['title']
+              = jobs['id']
             %td{width: '100'}
-              = offer['date']
+              = jobs['date']
+            %td{width: '100'}
+              =jobs['cities']
             %td{width: '400'}
-              = offer['details']
+              =jobs['details']

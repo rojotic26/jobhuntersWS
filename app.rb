@@ -58,18 +58,16 @@ class TecolocoJobOffers < Sinatra::Base
     #Defining the function get_jobs_cat_city
     def get_jobs_cat_city(category,city)
       jobs_after_city = {
-        'type of job' => category,
-        'kind' => 'openings',
-        'city' => city,
         'jobs' => []
       }
       flag=false
-      cat = category[0]
+      cat = check_cat(category[0])
       cit = city[0]
-        JobSearch::Tecoloco.getjobs(cat).each do |title, date, cities|
+
+        JobSearch::Tecoloco.getjobs(cat).each do |title, date, cities, details|
           if cities.to_s == cit.to_s
             flag=true
-            jobs_after_city['jobs'].push('id' => title, 'date' => date)
+            jobs_after_city['jobs'].push('id' => title, 'date' => date, 'cities' => cities, 'details' => details)
           end
         end
         if flag==false then
@@ -120,6 +118,7 @@ class TecolocoJobOffers < Sinatra::Base
         @output = "banco-servicios-financieros"
       else
         @output = "none"
+        halt 404
       end
       @output
     end
@@ -243,12 +242,11 @@ class TecolocoJobOffers < Sinatra::Base
       @category = session[:category]
       @city = session[:city]
     else
-      request_url = "#{API_BASE_URI}/api/v1/joboffers/#{params[:id]}"
+      request_url = "#{API_BASE_URI}/api/v1/offers/#{params[:id]}"
       request = { headers: {'Content-Type' => 'application/json' } }
-      result = HTTParty.get(request_url,options)
-      @results = results
+      result = HTTParty.get(request_url,request)
+      @results = result
     end
-
     @id = params[:id]
     @action = :update
     haml :offers
