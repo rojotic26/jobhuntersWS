@@ -284,11 +284,10 @@ class TecolocoJobOffers < Sinatra::Base
     haml :offers
   end
 
-  delete 'offers/:id' do
-
+  delete '/offers/:id' do
       request_url = "#{API_BASE_URI}/api/v1/joboffers/#{params[:id]}"
       result = HTTParty.delete(request_url)
-      flash[:notice] = 'record of tutorial deleted'
+      flash[:notice] = 'record of job offers deleted'
       redirect '/offers'
 
   end

@@ -22,6 +22,9 @@
           %option{:value => "Republica Dominicana"}= "Republica Dominicana"
     .float-clear
       %input{type: 'submit', id: 'home-form-submit', class: 'submit', value: 'submit'}
+  %form{:action => "/offers/#{@id}", :method => 'post', :id => 'delete-form'}
+    - if @action == :update
+      %input{:type => 'submit', :name => '_method', :value => 'delete', :class => 'delete'}                 
   %br
   %br
   %br
