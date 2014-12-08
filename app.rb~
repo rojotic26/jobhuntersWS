@@ -58,6 +58,29 @@ class TecolocoJobOffers < Sinatra::Base
     #Defining the function get_jobs_cat_city
     def get_jobs_cat_city(category,city)
       jobs_after_city = {
+        'jobs' => []
+      }
+      flag=false
+      cat = check_cat(category[0])
+      cit = city[0]
+
+        JobSearch::Tecoloco.getjobs(cat).each do |title, date, cities, details|
+          if cities.to_s == cit.to_s
+            flag=true
+            jobs_after_city['jobs'].push('id' => title, 'date' => date, 'cities' => cities, 'details' => details)
+          end
+        end
+        if flag==false then
+          halt 404
+        else
+          jobs_after_city
+        end
+
+
+    end
+
+    def get_jobs_cat_city_url(category,city)
+      jobs_after_city = {
         'type of job' => category,
         'kind' => 'openings',
         'city' => city,
@@ -66,20 +89,23 @@ class TecolocoJobOffers < Sinatra::Base
       flag=false
       category = params[:category]
       city = params[:city]
-      JobSearch::Tecoloco.getjobs(category).each do |title, date, cities|
-        if cities.to_s == city.to_s
-          flag=true
-          jobs_after_city['jobs'].push('id' => title, 'date' => date)
+
+
+        JobSearch::Tecoloco.getjobs(cat).each do |title, date, cities|
+          if cities.to_s == city.to_s
+            flag=true
+            jobs_after_city['jobs'].push('id' => title, 'date' => date)
+          end
         end
-      end
-      if flag==false then
-        halt 404
-      else
-        jobs_after_city
-      end
+        if flag==false then
+          halt 404
+        else
+          jobs_after_city
+        end
+
+
 
     end
-
 
     #Defining the function get_jobs_city
     def check_cat(category)
@@ -92,6 +118,7 @@ class TecolocoJobOffers < Sinatra::Base
         @output = "banco-servicios-financieros"
       else
         @output = "none"
+        halt 404
       end
       @output
     end
@@ -110,6 +137,7 @@ class TecolocoJobOffers < Sinatra::Base
       request_path = path_info.split '/'
       request_path[1] == path
     end
+
 
   end
 
@@ -132,22 +160,21 @@ class TecolocoJobOffers < Sinatra::Base
 
   get '/api/v1/job_openings/:category/city/:city.json' do
     content_type :json
-    get_jobs_cat_city(params[:category],params[:city]).to_json
+    get_jobs_cat_city_url(params[:category],params[:city]).to_json
   end
-
 
   post '/api/v1/joboffers' do
     content_type:json
 
-      body = request.body.read
-      logger.info body
-      begin
-        req = JSON.parse(body)
-        logger.info req
-      rescue Exception => e
-        puts e.message
-        halt 400
-      end
+    body = request.body.read
+    logger.info body
+    begin
+      req = JSON.parse(body)
+      logger.info req
+    rescue Exception => e
+      puts e.message
+      halt 400
+    end
 
     cat = Category.new
     cat.category = req['category'].to_json
@@ -162,106 +189,22 @@ class TecolocoJobOffers < Sinatra::Base
     cat = Category.destroy(params[:id])
   end
 
-  post '/offers' do
-    request_url = "#{API_BASE_URI}/api/v1/joboffers"
-    category = params[:category].split("\r\n")
-    city = params[:city].split("\r\n")
-    param = {
-      category: category,
-      city: city
-    }
-
-    request = {
-      body: param.to_json,
-      headers: { 'Content-Type' => 'application/json' }
-    }
-    result = HTTParty.post(request_url, request)
-
-    if (result.code != 200)
-      flash[:notice] = 'The values provided did not match any result'
-      redirect '/offers'
-      return nil
-    end
-
-    id = result.request.last_uri.path.split('/').last
-    session[:result] = result.to_json
-    session[:category] = category
-    session[:city] = city
-    session[:action] = :create
-    redirect "/offers/#{id}"
-  end
-
-  get 'offers/:id' do
-    if sessiion[:action] == :create
-      @results = JSON.parse(session[:result])
-      @category = session[:category]
-      @city = session[:city]
-    else
-      request_url = "#{API_BASE_URI}/api/v1/joboffers/#{params[:id]}"
-      request = { headers: {'Content-Type' => 'application/json' } }
-      result = HTTParty.get(request_url,options)
-      @results = results
-    end
-
-    @id = params[:id]
-    @action = :update
-    haml :offers
-  end
-
   get '/api/v1/offers/:id' do
     content_type:json
     logger.info "GET /api/v1/offers/#{params[:id]}"
-    #begin
-      @Category = Category.find(params[:id])
+    begin
+      @category = Category.find(params[:id])
       cat = JSON.parse(@category.category)
-      city = JSON.parse(@city.city)
-      logger.info({ category: cat, city: city }.to_json)
-    #rescue
-      #halt 400
-    #end
-    result = get_jobs_cat_city(cat,city).to_json
+      cat2 = @category.category
+      city = JSON.parse(@category.city)
+    rescue
+      halt 400
+    end
+    logger.info({ category: cat, city: city }.to_json)
+    result = get_jobs_cat_city(cat, city).to_json
     logger.info "result: #{result}\n"
     result
   end
 
-  get '/joboffers' do
-
-    @category = params[:category]
-    if @category
-      redirect "/joboffers/#{@category}"
-      return nil
-    end
-    haml :joboffers
-  end
-
-  get '/joboffers/:category' do
-    @jobofferobject = offerobject
-    @category = params[:category]
-
-    if @category && @jobofferobject.nil?
-      flash[:notice] = 'Category not found' if @jobofferobject.nil?
-
-      redirect '/joboffers'
-    end
-    haml :joboffers
-  end
-
-  get '/aboutus' do
-    haml :aboutus
-  end
-
-  get '/offers' do
-    haml :offers
-  end
-
-  delete 'offers/:id' do
-
-      request_url = "#{API_BASE_URI}/api/v1/joboffers/#{params[:id]}"
-      result = HTTParty.delete(request_url)
-      flash[:notice] = 'record of tutorial deleted'
-      redirect '/offers'
-
-  end
-
-
+  
 end

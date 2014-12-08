@@ -141,11 +141,6 @@ class TecolocoJobOffers < Sinatra::Base
 
   end
 
-
-  get '/' do
-    haml :home
-  end
-
   get '/api/v1/job_openings/:category.json' do
     cat = params[:category]
     category_url = check_cat(cat)
@@ -161,36 +156,6 @@ class TecolocoJobOffers < Sinatra::Base
   get '/api/v1/job_openings/:category/city/:city.json' do
     content_type :json
     get_jobs_cat_city_url(params[:category],params[:city]).to_json
-  end
-
-
-  post '/offers' do
-    request_url = "#{API_BASE_URI}/api/v1/joboffers"
-    category = params[:category].split("\r\n")
-    city = params[:city].split("\r\n")
-    param = {
-      category: category,
-      city: city
-    }
-
-    request = {
-      body: param.to_json,
-      headers: { 'Content-Type' => 'application/json' }
-    }
-    result = HTTParty.post(request_url, request)
-
-    if (result.code != 200)
-      flash[:notice] = 'The values provided did not match any result'
-      redirect '/offers'
-      return nil
-    end
-
-    id = result.request.last_uri.path.split('/').last
-    session[:result] = result.to_json
-    session[:category] = category
-    session[:city] = city
-    session[:action] = :create
-    redirect "/offers/#{id}"
   end
 
   post '/api/v1/joboffers' do
@@ -236,61 +201,5 @@ class TecolocoJobOffers < Sinatra::Base
     result
   end
 
-  get '/offers/:id' do
-    if session[:action] == :create
-      @results = JSON.parse(session[:result])
-      @category = session[:category]
-      @city = session[:city]
-    else
-      request_url = "#{API_BASE_URI}/api/v1/offers/#{params[:id]}"
-      request = { headers: {'Content-Type' => 'application/json' } }
-      result = HTTParty.get(request_url,request)
-      @results = result
-    end
-    @id = params[:id]
-    @action = :update
-    haml :offers
-  end
-
-
-
-  get '/joboffers' do
-
-    @category = params[:category]
-    if @category
-      redirect "/joboffers/#{@category}"
-      return nil
-    end
-    haml :joboffers
-  end
-
-  get '/joboffers/:category' do
-    @jobofferobject = offerobject
-    @category = params[:category]
-
-    if @category && @jobofferobject.nil?
-      flash[:notice] = 'Category not found' if @jobofferobject.nil?
-
-      redirect '/joboffers'
-    end
-    haml :joboffers
-  end
-
-  get '/aboutus' do
-    haml :aboutus
-  end
-
-  get '/offers' do
-    haml :offers
-  end
-
-  delete '/offers/:id' do
-      request_url = "#{API_BASE_URI}/api/v1/joboffers/#{params[:id]}"
-      result = HTTParty.delete(request_url)
-      flash[:notice] = 'record of job offers deleted'
-      redirect '/offers'
-
-  end
-
-
+  
 end
