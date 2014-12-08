@@ -1,0 +1,9 @@
+require 'sinatra'
+require 'sinatra/activerecord'
+require_relative '../environments'
+<<<<<<< HEAD:model/joboffer.rb
+class Joboffer < ActiveRecord::Base
+=======
+class Offer < ActiveRecord::Base
+>>>>>>> d9349b89f799f95f1db545aea40f125eee3b414b:model/offer.rb
+end

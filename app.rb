@@ -137,6 +137,8 @@ class TecolocoJobOffers < Sinatra::Base
       request_path = path_info.split '/'
       request_path[1] == path
     end
+
+
   end
 
   get '/api/v1/job_openings/:category.json' do
@@ -193,13 +195,11 @@ class TecolocoJobOffers < Sinatra::Base
     rescue
       halt 400
     end
-
     logger.info({ category: cat, city: city }.to_json)
     result = get_jobs_cat_city(cat, city).to_json
     logger.info "result: #{result}\n"
     result
   end
-
 
   
 end
