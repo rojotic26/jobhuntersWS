@@ -108,11 +108,6 @@ class TecolocoJobOffers < Sinatra::Base
 
   end
 
-
-  get '/' do
-    haml :home
-  end
-
   get '/api/v1/job_openings/:category.json' do
     cat = params[:category]
     category_url = check_cat(cat)
@@ -160,31 +155,7 @@ class TecolocoJobOffers < Sinatra::Base
     list_joboffers(cat).to_json
   end
 
-  get '/joboffers' do
-
-    @category = params[:category]
-    if @category
-      redirect "/joboffers/#{@category}"
-      return nil
-    end
-    haml :joboffers
-  end
-
-  get '/joboffers/:category' do
-    @jobofferobject = offerobject
-    @category = params[:category]
-
-    if @category && @jobofferobject.nil?
-      flash[:notice] = 'Category not found' if @jobofferobject.nil?
-
-      redirect '/joboffers'
-    end
-    haml :joboffers
-  end
-
-  get '/aboutus' do
-    haml :aboutus
-  end
+  
 
 
 
